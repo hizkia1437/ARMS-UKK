@@ -12,13 +12,8 @@ class MaintenanceReportController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $user = $request->user();
 
         $query = MaintenanceReport::with(['user', 'asset', 'room']);
-
-        if ($user->isUser()) {
-            $query->where('user_id', $user->id);
-        }
 
         $reports = $query->when($search, function ($q, $search) {
                 $q->where('report_code', 'like', "%{$search}%")

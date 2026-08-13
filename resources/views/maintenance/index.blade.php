@@ -134,8 +134,8 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4">
-        {{ $reports->links() }}
+    <div class="mt-4 d-flex justify-content-end">
+        {{ $reports->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection

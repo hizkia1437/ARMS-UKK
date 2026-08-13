@@ -148,8 +148,8 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4">
-        {{ $assets->links() }}
+    <div class="mt-4 d-flex justify-content-end">
+        {{ $assets->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection

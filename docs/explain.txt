@@ -1,0 +1,24 @@
+Class & Inheritance (Pewarisan):
+Setiap Controller mewarisi parent controller (class ReservationController extends Controller).
+Setiap Request mewarisi FormRequest (class UserRequest extends FormRequest).
+Encapsulation (Pengapsulan Data & Model):
+Data tabel diwakili oleh Eloquent Model (User.php, Asset.php, Room.php, Reservation.php, MaintenanceReport.php). Property $fillable mengapsulasi kolom mana saja yang aman diisi.
+Abstraction (Abstraksi & Method):
+Model User memiliki method abstraksi peran: $user->isAdmin(), $user->isStaff(), $user->isUser().
+Polymorphism & Objects (Instansiasi Objek & Dependency Injection):
+Parameter di Controller otomatis di-inject sebagai objek (public function update(ReservationRequest $request, Reservation $reservation)
+
+
+ARMS (Asset Reservation & Maintenance System) berbasis Laravel 12. Aplikasi ini dibuat untuk mengelola peminjaman ruangan dan pelaporan kerusakan aset/fasilitas secara terintegrasi dengan menerapkan arsitektur MVC (Model-View-Controller) dan Object-Oriented Programming (OOP)."
+
+Keunggulan Utama Aplikasi Yang Bisa Anda Pamerkan:
+
+Hak Akses Berbasis Peran (RBAC 3 Role):
+Admin: Pengelola utama master data & persetujuan reservasi. Akun Admin Utama dilindungi (Protected Admin) dari penghapusan/pengeditan yang tidak sengaja.
+Staff: Pengelola operasional aset & ruangan (Full CRUD Aset/Ruangan, ubah kondisi barang 1-klik Good/Needs Repair/Damaged, & tindak lanjut maintenance).
+User: Pengguna akhir yang mengajukan reservasi ruangan & melaporkan masalah fisik aset/ruangan.
+Penyelesaian Bentrok Jadwal Otomatis (Auto Conflict Resolution):
+Mencegah tabrakan jam pemesanan: Jika slot waktu sudah disetujui (Approved), user lain tidak bisa memesan di jam & ruangan yang sama.
+Auto-Reject: Saat Admin meng-Approve salah satu pengajuan, pengajuan lain yang Pending di jam & ruangan yang sama otomatis ditolak oleh sistem.
+Laporan Kerusakan Ganda (Aset & Ruangan):
+Sistem bisa mencatat laporan kerusakan barang (seperti Laptop/Proyektor) maupun kerusakan fasilitas ruangan (seperti Atap Bocor/AC Ruangan).

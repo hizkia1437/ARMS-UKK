@@ -1,0 +1,34 @@
+http://localhost:8000
+
+Login with Demo Credentials:
+Admin: admin@arms.test | Password: password
+Staff: staff@arms.test | Password: password
+User: user@arms.test | Password: password
+hizkiadwiasmoro@gmail.com AWESOME1437
+
+
+ARMS (Asset Reservation & Maintenance System) - Walkthrough
+Summary of Accomplishments
+The ARMS (Asset Reservation & Maintenance System) web application built for Indonesian Vocational High School (SMK) Competency Test (Pra-UKK & UKK) is fully implemented, verified, and successfully pushed to GitHub.
+
+GitHub Repository: https://github.com/hizkia1437/ARMS-UKK.git
+Tech Stack: Laravel 12, PHP 8.2.12, MySQL (arms_db), Bootstrap 5.3, Bootstrap Icons.
+Completed Features & Architecture
+1. 🛡️ Role-Based Access Control (RBAC)
+Admin: Full master data management (Users, Assets, Rooms, Reservations, Maintenance Reports). Super Admin account (admin@arms.test) is protected ("Protected Admin") from being edited or deleted.
+Staff: Full CRUD on Assets & Rooms, ability to update asset condition (Good, Needs Repair, Damaged) in 1 click, view all reservations, report room/asset issues, and complete maintenance reports.
+User: View own reservations, create room reservations with smart conflict detection, view Read-Only Assets with "Report Issue" quick action, and view own maintenance reports.
+2. ⚡ Automatic Schedule Conflict Resolution
+Overlap Prevention: Blocks booking if an Approved reservation already occupies the room at the selected date and time.
+Auto-Rejection on Approval: When Admin approves a reservation, any other Pending reservations for the same room, date, and overlapping time slot are automatically set to Rejected.
+3. 🛠️ Room & Asset Maintenance Reports
+Supports reporting issues for specific Assets or Room Facilities.
+Contextual navigation (from=assets, from=rooms) preserves user flow on cancel/back actions.
+4. 🎨 UI & Aesthetics
+Responsive Bootstrap 5 layout with glassmorphic cards, custom badges, data tables, search filters, and modal dialogs.
+Clean authentication flow (login, register, profile management).
+Verification & Deployment
+Database schema migrated and seeded (arms_db).
+All 47 Blade templates compiled without errors (100% OK).
+All HTTP routes tested and operational.
+Git initial commit pushed to main branch on GitHub: https://github.com/hizkia1437/ARMS-UKK.git.

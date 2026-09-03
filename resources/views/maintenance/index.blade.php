@@ -16,21 +16,45 @@
 </div>
 
 <div class="card card-custom p-4">
-    <!-- Search Form -->
+    <!-- Search, Filter & Sort Form -->
     <form method="GET" action="{{ route('maintenance.index') }}" class="mb-4">
-        <div class="row g-2">
-            <div class="col-12 col-md-5">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search by code, asset, reporter, description, or status...">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search maintenance reports...">
                 </div>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-secondary rounded-2">Search</button>
-                @if(request('search'))
-                    <a href="{{ route('maintenance.index') }}" class="btn btn-outline-secondary rounded-2">Reset</a>
+            <div class="col-6 col-md-2">
+                <select name="status" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Completed" {{ request('status') === 'Completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="target_type" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="">All Targets</option>
+                    <option value="asset" {{ request('target_type') === 'asset' ? 'selected' : '' }}>Asset Equipment</option>
+                    <option value="room" {{ request('target_type') === 'room' ? 'selected' : '' }}>Room Facility</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="sort_by" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="created_at" {{ request('sort_by', 'created_at') === 'created_at' ? 'selected' : '' }}>Sort by: Date</option>
+                    <option value="report_code" {{ request('sort_by') === 'report_code' ? 'selected' : '' }}>Sort by: Code</option>
+                    <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Sort by: Status</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 d-flex gap-1">
+                <select name="sort_dir" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="desc" {{ request('sort_dir', 'desc') === 'desc' ? 'selected' : '' }}>DESC ⬇️</option>
+                    <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>ASC ⬆️</option>
+                </select>
+                @if(request('search') || request('status') || request('target_type') || request('sort_by') || request('sort_dir'))
+                    <a href="{{ route('maintenance.index') }}" class="btn btn-outline-secondary rounded-2" title="Reset Filters"><i class="bi bi-x-circle"></i></a>
                 @endif
             </div>
         </div>

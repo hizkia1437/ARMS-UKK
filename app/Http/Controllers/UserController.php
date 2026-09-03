@@ -12,18 +12,25 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $role = $request->input('role');
+        $sortBy = in_array($request->input('sort_by'), ['name', 'email', 'role', 'created_at']) ? $request->input('sort_by') : 'created_at';
+        $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
 
-        $users = User::query()
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('role', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query = User::query();
 
-        return view('users.index', compact('users', 'search'));
+        $query->when($search, function ($q, $search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('role', 'like', "%{$search}%");
+        });
+
+        $query->when($role, function ($q, $role) {
+            $q->where('role', $role);
+        });
+
+        $users = $query->orderBy($sortBy, $sortDir)->paginate(10)->withQueryString();
+
+        return view('users.index', compact('users', 'search', 'role', 'sortBy', 'sortDir'));
     }
 
     public function create()

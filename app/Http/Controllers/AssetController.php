@@ -11,20 +11,33 @@ class AssetController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $category = $request->input('category');
+        $condition = $request->input('condition');
+        $sortBy = in_array($request->input('sort_by'), ['name', 'asset_code', 'category', 'condition', 'location', 'created_at']) ? $request->input('sort_by') : 'created_at';
+        $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
 
-        $assets = Asset::query()
-            ->when($search, function ($query, $search) {
-                $query->where('asset_code', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('condition', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query = Asset::query();
 
-        return view('assets.index', compact('assets', 'search'));
+        $query->when($search, function ($q, $search) {
+            $q->where('asset_code', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%")
+                ->orWhere('category', 'like', "%{$search}%")
+                ->orWhere('condition', 'like', "%{$search}%")
+                ->orWhere('location', 'like', "%{$search}%");
+        });
+
+        $query->when($category, function ($q, $category) {
+            $q->where('category', $category);
+        });
+
+        $query->when($condition, function ($q, $condition) {
+            $q->where('condition', $condition);
+        });
+
+        $assets = $query->orderBy($sortBy, $sortDir)->paginate(10)->withQueryString();
+        $categories = Asset::select('category')->distinct()->pluck('category');
+
+        return view('assets.index', compact('assets', 'search', 'category', 'condition', 'sortBy', 'sortDir', 'categories'));
     }
 
     public function create()

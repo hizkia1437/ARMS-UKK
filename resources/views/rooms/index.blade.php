@@ -18,21 +18,41 @@
 </div>
 
 <div class="card card-custom p-4">
-    <!-- Search Form -->
+    <!-- Search, Filter & Sort Form -->
     <form method="GET" action="{{ route('rooms.index') }}" class="mb-4">
-        <div class="row g-2">
+        <div class="row g-2 align-items-center">
             <div class="col-12 col-md-5">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search by code, name, capacity, or status...">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search rooms by code, name, capacity...">
                 </div>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-secondary rounded-2">Search</button>
-                @if(request('search'))
-                    <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary rounded-2">Reset</a>
+            <div class="col-6 col-md-2">
+                <select name="status" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Available" {{ request('status') === 'Available' ? 'selected' : '' }}>Available</option>
+                    <option value="Occupied" {{ request('status') === 'Occupied' ? 'selected' : '' }}>Occupied</option>
+                    <option value="Under Maintenance" {{ request('status') === 'Under Maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="sort_by" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="created_at" {{ request('sort_by', 'created_at') === 'created_at' ? 'selected' : '' }}>Sort by: Date</option>
+                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Sort by: Name</option>
+                    <option value="capacity" {{ request('sort_by') === 'capacity' ? 'selected' : '' }}>Sort by: Capacity</option>
+                    <option value="room_code" {{ request('sort_by') === 'room_code' ? 'selected' : '' }}>Sort by: Code</option>
+                    <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Sort by: Status</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 d-flex gap-1">
+                <select name="sort_dir" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="desc" {{ request('sort_dir', 'desc') === 'desc' ? 'selected' : '' }}>DESC ⬇️</option>
+                    <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>ASC ⬆️</option>
+                </select>
+                @if(request('search') || request('status') || request('sort_by') || request('sort_dir'))
+                    <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary rounded-2" title="Reset Filters"><i class="bi bi-x-circle"></i></a>
                 @endif
             </div>
         </div>

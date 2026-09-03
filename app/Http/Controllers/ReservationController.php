@@ -13,6 +13,11 @@ class ReservationController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status');
+        $roomId = $request->input('room_id');
+        $sortBy = in_array($request->input('sort_by'), ['reservation_date', 'start_time', 'reservation_code', 'status', 'created_at']) ? $request->input('sort_by') : 'reservation_date';
+        $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
+
         $user = $request->user();
 
         $query = Reservation::with(['user', 'room']);
@@ -21,22 +26,30 @@ class ReservationController extends Controller
             $query->where('user_id', $user->id);
         }
 
-        $reservations = $query->when($search, function ($q, $search) {
-                $q->where('reservation_code', 'like', "%{$search}%")
-                    ->orWhere('purpose', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%")
-                    ->orWhereHas('room', function ($rq) use ($search) {
-                        $rq->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('name', 'like', "%{$search}%");
-                    });
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query->when($search, function ($q, $search) {
+            $q->where('reservation_code', 'like', "%{$search}%")
+                ->orWhere('purpose', 'like', "%{$search}%")
+                ->orWhere('status', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('room', function ($rq) use ($search) {
+                    $rq->where('name', 'like', "%{$search}%");
+                });
+        });
 
-        return view('reservations.index', compact('reservations', 'search'));
+        $query->when($status, function ($q, $status) {
+            $q->where('status', $status);
+        });
+
+        $query->when($roomId, function ($q, $roomId) {
+            $q->where('room_id', $roomId);
+        });
+
+        $reservations = $query->orderBy($sortBy, $sortDir)->paginate(10)->withQueryString();
+        $rooms = Room::all();
+
+        return view('reservations.index', compact('reservations', 'search', 'status', 'roomId', 'sortBy', 'sortDir', 'rooms'));
     }
 
     public function create()

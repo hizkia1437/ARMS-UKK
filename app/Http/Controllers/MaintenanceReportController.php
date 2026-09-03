@@ -12,28 +12,43 @@ class MaintenanceReportController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status');
+        $targetType = $request->input('target_type');
+        $sortBy = in_array($request->input('sort_by'), ['report_code', 'status', 'created_at']) ? $request->input('sort_by') : 'created_at';
+        $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
 
         $query = MaintenanceReport::with(['user', 'asset', 'room']);
 
-        $reports = $query->when($search, function ($q, $search) {
-                $q->where('report_code', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%")
-                    ->orWhereHas('asset', function ($aq) use ($search) {
-                        $aq->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('room', function ($rq) use ($search) {
-                        $rq->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('name', 'like', "%{$search}%");
-                    });
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query->when($search, function ($q, $search) {
+            $q->where('report_code', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('status', 'like', "%{$search}%")
+                ->orWhereHas('asset', function ($aq) use ($search) {
+                    $aq->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('room', function ($rq) use ($search) {
+                    $rq->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%");
+                });
+        });
 
-        return view('maintenance.index', compact('reports', 'search'));
+        $query->when($status, function ($q, $status) {
+            $q->where('status', $status);
+        });
+
+        $query->when($targetType === 'asset', function ($q) {
+            $q->whereNotNull('asset_id');
+        });
+
+        $query->when($targetType === 'room', function ($q) {
+            $q->whereNotNull('room_id');
+        });
+
+        $reports = $query->orderBy($sortBy, $sortDir)->paginate(10)->withQueryString();
+
+        return view('maintenance.index', compact('reports', 'search', 'status', 'targetType', 'sortBy', 'sortDir'));
     }
 
     public function create()

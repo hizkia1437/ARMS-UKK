@@ -18,21 +18,49 @@
 </div>
 
 <div class="card card-custom p-4">
-    <!-- Search Form -->
+    <!-- Search, Filter & Sort Form -->
     <form method="GET" action="{{ route('assets.index') }}" class="mb-4">
-        <div class="row g-2">
-            <div class="col-12 col-md-5">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search by code, name, category, condition, or location...">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Search assets...">
                 </div>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-secondary rounded-2">Search</button>
-                @if(request('search'))
-                    <a href="{{ route('assets.index') }}" class="btn btn-outline-secondary rounded-2">Reset</a>
+            <div class="col-6 col-md-2">
+                <select name="category" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="condition" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="">All Conditions</option>
+                    <option value="Good" {{ request('condition') === 'Good' ? 'selected' : '' }}>Good</option>
+                    <option value="Needs Repair" {{ request('condition') === 'Needs Repair' ? 'selected' : '' }}>Needs Repair</option>
+                    <option value="Damaged" {{ request('condition') === 'Damaged' ? 'selected' : '' }}>Damaged</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="sort_by" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="created_at" {{ request('sort_by', 'created_at') === 'created_at' ? 'selected' : '' }}>Sort by: Date</option>
+                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Sort by: Name</option>
+                    <option value="asset_code" {{ request('sort_by') === 'asset_code' ? 'selected' : '' }}>Sort by: Code</option>
+                    <option value="category" {{ request('sort_by') === 'category' ? 'selected' : '' }}>Sort by: Category</option>
+                    <option value="condition" {{ request('sort_by') === 'condition' ? 'selected' : '' }}>Sort by: Condition</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 d-flex gap-1">
+                <select name="sort_dir" class="form-select text-secondary" onchange="this.form.submit()">
+                    <option value="desc" {{ request('sort_dir', 'desc') === 'desc' ? 'selected' : '' }}>DESC ⬇️</option>
+                    <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>ASC ⬆️</option>
+                </select>
+                @if(request('search') || request('category') || request('condition') || request('sort_by') || request('sort_dir'))
+                    <a href="{{ route('assets.index') }}" class="btn btn-outline-secondary rounded-2" title="Reset Filters"><i class="bi bi-x-circle"></i></a>
                 @endif
             </div>
         </div>

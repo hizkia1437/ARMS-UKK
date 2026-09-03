@@ -11,18 +11,26 @@ class RoomController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status');
+        $sortBy = in_array($request->input('sort_by'), ['name', 'room_code', 'capacity', 'status', 'created_at']) ? $request->input('sort_by') : 'created_at';
+        $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
 
-        $rooms = Room::query()
-            ->when($search, function ($query, $search) {
-                $query->where('room_code', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query = Room::query();
 
-        return view('rooms.index', compact('rooms', 'search'));
+        $query->when($search, function ($q, $search) {
+            $q->where('room_code', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%")
+                ->orWhere('capacity', 'like', "%{$search}%")
+                ->orWhere('status', 'like', "%{$search}%");
+        });
+
+        $query->when($status, function ($q, $status) {
+            $q->where('status', $status);
+        });
+
+        $rooms = $query->orderBy($sortBy, $sortDir)->paginate(10)->withQueryString();
+
+        return view('rooms.index', compact('rooms', 'search', 'status', 'sortBy', 'sortDir'));
     }
 
     public function create()

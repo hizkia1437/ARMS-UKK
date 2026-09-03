@@ -47,7 +47,9 @@
         <div class="card card-custom p-3 border-start border-4 border-warning">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small fw-semibold text-uppercase">Pending Reservations</span>
+                    <span class="text-muted small fw-semibold text-uppercase">
+                        {{ auth()->user()->isUser() ? 'My Pending Reservations' : 'Pending Reservations' }}
+                    </span>
                     <h2 class="fw-bold mb-0 mt-1">{{ number_format($pendingReservations) }}</h2>
                 </div>
                 <div class="bg-warning-subtle text-warning p-3 rounded-circle">
@@ -61,7 +63,9 @@
         <div class="card card-custom p-3 border-start border-4 border-danger">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small fw-semibold text-uppercase">Pending Maintenances</span>
+                    <span class="text-muted small fw-semibold text-uppercase">
+                        {{ auth()->user()->isUser() ? 'My Pending Reports' : 'Pending Maintenances' }}
+                    </span>
                     <h2 class="fw-bold mb-0 mt-1">{{ number_format($pendingMaintenances) }}</h2>
                 </div>
                 <div class="bg-danger-subtle text-danger p-3 rounded-circle">

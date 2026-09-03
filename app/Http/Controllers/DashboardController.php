@@ -16,20 +16,16 @@ class DashboardController extends Controller
         
         $totalAssets = Asset::count();
         $totalRooms = Room::count();
+        $pendingReservations = Reservation::where('status', 'Pending')->count();
+        $pendingMaintenances = MaintenanceReport::where('status', 'Pending')->count();
 
         if ($user->isUser()) {
-            $pendingReservations = Reservation::where('user_id', $user->id)->where('status', 'Pending')->count();
-            $pendingMaintenances = MaintenanceReport::where('user_id', $user->id)->where('status', 'Pending')->count();
-            
             $recentReservations = Reservation::with(['room', 'user'])
                 ->where('user_id', $user->id)
                 ->latest()
                 ->take(5)
                 ->get();
         } else {
-            $pendingReservations = Reservation::where('status', 'Pending')->count();
-            $pendingMaintenances = MaintenanceReport::where('status', 'Pending')->count();
-            
             $recentReservations = Reservation::with(['room', 'user'])
                 ->latest()
                 ->take(5)

@@ -12,9 +12,23 @@
     <div class="col-12 col-lg-6">
         <div class="card card-custom p-4">
             <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary me-2"></i>Profile Information</h5>
-            <form method="POST" action="{{ route('profile.update') }}">
+            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
+
+                <div class="mb-4 text-center">
+                    <img src="{{ auth()->user()->avatar_url }}" alt="Profile Avatar" class="rounded-circle object-fit-cover shadow-sm mb-2 border border-3 border-primary-subtle" style="width: 100px; height: 100px;">
+                    <div>
+                        <label for="avatar" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-camera me-1"></i> Change Photo
+                        </label>
+                        <input type="file" name="avatar" id="avatar" class="d-none @error('avatar') is-invalid @enderror" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="this.form.submit()">
+                    </div>
+                    @error('avatar')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                    <div class="text-muted small mt-1">PNG, JPG, WEBP up to 2MB</div>
+                </div>
 
                 <div class="mb-3">
                     <label for="name" class="form-label fw-medium">Full Name <span class="text-danger">*</span></label>

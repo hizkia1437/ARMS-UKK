@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
+use App\Models\Notification;
 use App\Http\Requests\ReservationRequest;
 use Illuminate\Http\Request;
 
@@ -87,7 +88,19 @@ class ReservationController extends Controller
 
         $data['status'] = 'Pending';
 
-        Reservation::create($data);
+        $reservation = Reservation::create($data);
+
+        // Notify Admins and Staff
+        $adminStaffIds = User::whereIn('role', ['Admin', 'Staff'])->pluck('id');
+        foreach ($adminStaffIds as $recipientId) {
+            Notification::create([
+                'user_id' => $recipientId,
+                'title' => 'New Reservation Submitted',
+                'message' => "{$request->user()->name} submitted a reservation ({$reservation->reservation_code}) for " . ($reservation->room->name ?? 'Room') . " on " . date('d M Y', strtotime($reservation->reservation_date)),
+                'type' => 'reservation_created',
+                'link' => route('reservations.index'),
+            ]);
+        }
 
         return redirect()->route('reservations.index')->with('success', 'Reservation submitted successfully.');
     }
@@ -153,22 +166,38 @@ class ReservationController extends Controller
         $newStatus = $request->status;
         $reservation->update(['status' => $newStatus]);
 
+        // Notify reservation owner
+        Notification::create([
+            'user_id' => $reservation->user_id,
+            'title' => "Reservation {$newStatus}",
+            'message' => "Your reservation {$reservation->reservation_code} for " . ($reservation->room->name ?? 'Room') . " has been {$newStatus}.",
+            'type' => $newStatus === 'Approved' ? 'reservation_approved' : 'reservation_rejected',
+            'link' => route('reservations.index'),
+        ]);
+
         $autoRejectedCount = 0;
 
         // If approved, automatically reject any pending conflicting reservations for the same room, date & overlapping time slot
         if ($newStatus === 'Approved') {
-            $conflictingQuery = Reservation::where('id', '!=', $reservation->id)
+            $conflictingReservations = Reservation::where('id', '!=', $reservation->id)
                 ->where('room_id', $reservation->room_id)
                 ->where('reservation_date', $reservation->reservation_date)
                 ->where('status', 'Pending')
                 ->where(function ($query) use ($reservation) {
                     $query->where('start_time', '<', $reservation->end_time)
                           ->where('end_time', '>', $reservation->start_time);
-                });
+                })->get();
 
-            $autoRejectedCount = $conflictingQuery->count();
-            if ($autoRejectedCount > 0) {
-                $conflictingQuery->update(['status' => 'Rejected']);
+            $autoRejectedCount = $conflictingReservations->count();
+            foreach ($conflictingReservations as $conflict) {
+                $conflict->update(['status' => 'Rejected']);
+                Notification::create([
+                    'user_id' => $conflict->user_id,
+                    'title' => 'Reservation Auto-Rejected',
+                    'message' => "Your reservation {$conflict->reservation_code} for " . ($conflict->room->name ?? 'Room') . " was automatically rejected due to a schedule conflict.",
+                    'type' => 'reservation_rejected',
+                    'link' => route('reservations.index'),
+                ]);
             }
         }
 

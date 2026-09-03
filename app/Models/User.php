@@ -23,7 +23,16 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'avatar',
     ];
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=2563eb&background=dbeafe';
+    }
 
     public function isAdmin(): bool
     {
@@ -48,6 +57,11 @@ class User extends Authenticatable
     public function maintenanceReports()
     {
         return $this->hasMany(MaintenanceReport::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest();
     }
 
     /**

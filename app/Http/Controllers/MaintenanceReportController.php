@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\MaintenanceReport;
 use App\Models\Asset;
+use App\Models\User;
+use App\Models\Notification;
 use App\Http\Requests\MaintenanceReportRequest;
 use Illuminate\Http\Request;
 
@@ -74,7 +76,21 @@ class MaintenanceReportController extends Controller
 
         $data['status'] = 'Pending';
 
-        MaintenanceReport::create($data);
+        $report = MaintenanceReport::create($data);
+
+        $targetName = $report->asset->name ?? $report->room->name ?? 'Target Item';
+
+        // Notify Admins and Staff
+        $adminStaffIds = User::whereIn('role', ['Admin', 'Staff'])->pluck('id');
+        foreach ($adminStaffIds as $recipientId) {
+            Notification::create([
+                'user_id' => $recipientId,
+                'title' => 'New Maintenance Report',
+                'message' => "{$request->user()->name} reported an issue ({$report->report_code}) for {$targetName}",
+                'type' => 'maintenance_created',
+                'link' => route('maintenance.index'),
+            ]);
+        }
 
         return redirect()->route('maintenance.index')->with('success', 'Maintenance report submitted successfully.');
     }
@@ -125,6 +141,18 @@ class MaintenanceReportController extends Controller
         ]);
 
         $maintenance->update(['status' => $request->status]);
+
+        $targetName = $maintenance->asset->name ?? $maintenance->room->name ?? 'Target Item';
+
+        if ($request->status === 'Completed') {
+            Notification::create([
+                'user_id' => $maintenance->user_id,
+                'title' => 'Maintenance Completed',
+                'message' => "Your reported issue ({$maintenance->report_code}) for {$targetName} has been resolved & marked Completed.",
+                'type' => 'maintenance_completed',
+                'link' => route('maintenance.index'),
+            ]);
+        }
 
         return redirect()->route('maintenance.index')->with('success', 'Maintenance status updated to ' . $request->status . '.');
     }

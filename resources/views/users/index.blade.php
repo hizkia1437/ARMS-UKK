@@ -72,7 +72,12 @@
                 @forelse($users as $user)
                 <tr>
                     <td>{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
-                    <td class="fw-semibold text-dark">{{ $user->name }}</td>
+                    <td class="fw-semibold text-dark">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="rounded-circle object-fit-cover border border-secondary-subtle" style="width: 32px; height: 32px;">
+                            <span>{{ $user->name }}</span>
+                        </div>
+                    </td>
                     <td>{{ $user->email }}</td>
                     <td>
                         @if($user->role === 'Admin')

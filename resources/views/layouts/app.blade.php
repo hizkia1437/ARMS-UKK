@@ -36,6 +36,11 @@
             background-color: #1e293b;
             color: #ffffff;
             transition: all 0.3s;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
         }
 
         #sidebar .sidebar-brand {
@@ -125,6 +130,8 @@
             #sidebar {
                 min-width: 100%;
                 max-width: 100%;
+                position: relative;
+                height: auto;
             }
         }
     </style>

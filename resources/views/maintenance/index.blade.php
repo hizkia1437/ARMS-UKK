@@ -112,6 +112,14 @@
                         </form>
                         @endif
 
+                        <!-- Discussion Button -->
+                        <button type="button" class="btn btn-sm btn-outline-info rounded-2 me-1" data-bs-toggle="modal" data-bs-target="#commentsMntModal{{ $report->id }}" title="Discussion / Comments">
+                            <i class="bi bi-chat-dots-fill"></i> Discuss
+                            @if($report->comments->count() > 0)
+                                <span class="badge rounded-pill bg-info text-dark ms-1">{{ $report->comments->count() }}</span>
+                            @endif
+                        </button>
+
                         @if(auth()->user()->isAdmin() || auth()->id() === $report->user_id)
                         <a href="{{ route('maintenance.edit', $report) }}" class="btn btn-sm btn-outline-primary me-1 rounded-2">
                             <i class="bi bi-pencil-square"></i> Edit
@@ -122,6 +130,76 @@
                         <button type="button" class="btn btn-sm btn-outline-danger rounded-2" data-bs-toggle="modal" data-bs-target="#deleteMntModal{{ $report->id }}">
                             <i class="bi bi-trash"></i> Delete
                         </button>
+
+                        <!-- Discussion Modal -->
+                        <div class="modal fade text-start" id="commentsMntModal{{ $report->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header border-bottom bg-light">
+                                        <h5 class="modal-title fw-bold">
+                                            <i class="bi bi-chat-left-text-fill text-primary me-2"></i>Discussion — {{ $report->report_code }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4" style="max-height: 450px; overflow-y: auto;">
+                                        <div class="mb-4 pb-3 border-bottom">
+                                            <small class="text-muted text-uppercase fw-semibold">Report Details</small>
+                                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                                <div>
+                                                    <span class="fw-bold fs-6">{{ $report->asset->name ?? $report->room->name ?? 'Item' }}</span>
+                                                    <span class="text-secondary small ms-2">({{ $report->created_at->format('d M Y') }})</span>
+                                                </div>
+                                                <span class="badge bg-secondary-subtle text-secondary border rounded-pill">Reported by: {{ $report->user->name ?? 'User' }}</span>
+                                            </div>
+                                            <p class="text-muted small mb-0 mt-1">Issue: {{ $report->description }}</p>
+                                        </div>
+
+                                        <!-- Comments Timeline -->
+                                        <div class="vstack gap-3 mb-4">
+                                            @forelse($report->comments as $cmt)
+                                                <div class="d-flex gap-3 align-items-start p-3 rounded-3 {{ $cmt->user_id === auth()->id() ? 'bg-primary-subtle bg-opacity-25 ms-4' : 'bg-light me-4' }}">
+                                                    <img src="{{ $cmt->user->avatar_url }}" alt="{{ $cmt->user->name }}" class="rounded-circle object-fit-cover border" style="width: 38px; height: 38px;">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <span class="fw-bold small text-dark">{{ $cmt->user->name }}</span>
+                                                                <span class="badge bg-secondary-subtle text-secondary small" style="font-size: 0.65rem;">{{ $cmt->user->role }}</span>
+                                                            </div>
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <small class="text-muted" style="font-size: 0.75rem;">{{ $cmt->created_at->diffForHumans() }}</small>
+                                                                @if(auth()->user()->isAdmin() || auth()->id() === $cmt->user_id)
+                                                                    <form method="POST" action="{{ route('comments.destroy', $cmt) }}" class="d-inline">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-link text-danger p-0 border-0 ms-1" style="font-size: 0.75rem;" title="Delete comment"><i class="bi bi-trash"></i></button>
+                                                                    </form>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <p class="mb-0 text-secondary small">{{ $cmt->body }}</p>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-center text-muted py-4">
+                                                    <i class="bi bi-chat-square-dots fs-2 d-block mb-2"></i>
+                                                    <small>No comments yet. Staff or users can communicate updates here!</small>
+                                                </div>
+                                            @endforelse
+                                        </div>
+
+                                        <!-- Add Comment Form -->
+                                        <form method="POST" action="{{ route('comments.store') }}">
+                                            @csrf
+                                            <input type="hidden" name="maintenance_report_id" value="{{ $report->id }}">
+                                            <div class="input-group">
+                                                <input type="text" name="body" class="form-control" placeholder="Write an update, note, or comment..." required>
+                                                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-send-fill me-1"></i> Post</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Delete Modal -->
                         <div class="modal fade text-start" id="deleteMntModal{{ $report->id }}" tabindex="-1" aria-hidden="true">

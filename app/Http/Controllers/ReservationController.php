@@ -21,7 +21,7 @@ class ReservationController extends Controller
 
         $user = $request->user();
 
-        $query = Reservation::with(['user', 'room']);
+        $query = Reservation::with(['room', 'user', 'comments.user']);
 
         if ($user->isUser()) {
             $query->where('user_id', $user->id);

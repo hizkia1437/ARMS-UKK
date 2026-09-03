@@ -19,7 +19,7 @@ class MaintenanceReportController extends Controller
         $sortBy = in_array($request->input('sort_by'), ['report_code', 'status', 'created_at']) ? $request->input('sort_by') : 'created_at';
         $sortDir = strtolower($request->input('sort_dir')) === 'asc' ? 'asc' : 'desc';
 
-        $query = MaintenanceReport::with(['user', 'asset', 'room']);
+        $query = MaintenanceReport::with(['user', 'asset', 'room', 'comments.user']);
 
         $query->when($search, function ($q, $search) {
             $q->where('report_code', 'like', "%{$search}%")

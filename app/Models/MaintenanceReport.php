@@ -32,4 +32,9 @@ class MaintenanceReport extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest();
+    }
 }
